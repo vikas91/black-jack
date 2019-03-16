@@ -1,0 +1,15 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}BlackJack Game{% endblock %}</title>
+</head>
+<body>
+  <main>
+    {% block content %}
+      <h1> Welcome to Blackjack Game {{request.user.username}} !</h1>
+    {% endblock %}
+  </main>
+</body>
+</html>
