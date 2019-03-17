@@ -25,8 +25,9 @@
                 Settings
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <span class="mx-2">Hi {{ request.user.get_full_name }} !</span>
+                <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="/profile">Profile</a>
-                <a class="dropdown-item" href="#">Another action</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="/logout">Logout</a>
               </div>
@@ -44,9 +45,26 @@
       </nav>
     </div>
     {% endblock %}
-  <main>
+  <main class="text-center mt-5">
     {% block content %}
       <h1> Welcome to Blackjack Game {{request.user.username}} !</h1>
+      {% if request.user.profile.wallet_value == 0 %}
+      <p> Update your wallet value <a href="/profile">here</a>. Minimum wallet amount is $25!</p>
+      {% else %}
+      <p> Select any table to continue!</p>
+      <div class="row px-3 justify-content-center">
+        {% for table in tables %}
+          <div class="card mx-1" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title">Table - {{table.id}}</h5>
+              <p class="card-text">Min Bet - {{table.min_bet}}</p>
+              <p class="card-text">Current Player Count - {{table.player_count}}</p>
+              <a href="#" class="btn btn-primary">Join</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     {% endblock %}
   </main>
   </div>

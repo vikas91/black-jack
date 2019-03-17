@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.utils.decorators import method_decorator
 from webapp.forms import ProfileForm, UserForm
+from webapp.models import Table
 
 class Register(View):
     def get(self, request):
@@ -39,12 +40,18 @@ class Profile(View):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-        
-        return render(request, 'profile.html', {
-            'user_form': user_form,
-            'profile_form': profile_form
-        })
+            return redirect('/')
+            
+        else:
+            return render(request, 'profile.html', {
+                'user_form': user_form,
+                'profile_form': profile_form
+            })
 
 @login_required
 def index(request):
-    return render(request, 'index.html')
+    if(request.user.profile.wallet_value>=25):
+        tables = Table.objects.filter(min_bet__lte=request.user.profile.wallet_value/5, player_count__lt=6)
+    else:
+        tables = None    
+    return render(request, 'index.html', {'tables': tables})
