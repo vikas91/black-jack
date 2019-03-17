@@ -4,8 +4,9 @@
   <div class="row m-5">
     <form method="post">
       {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">Sign up</button>
+      {{ user_form.as_p }}
+      {{ profile_form.as_p }}
+      <button type="submit">Save changes</button>
     </form>
   </div>
 {% endblock %}

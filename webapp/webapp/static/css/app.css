@@ -1,0 +1,9 @@
+.app-main.container {
+  max-width: none;
+}
+.app-main.container .navbar {
+  width: 100%;
+  -webkit-box-shadow: 1px 2px 4px rgba(0, 0, 0, .5);
+  -moz-box-shadow: 1px 2px 4px rgba(0, 0, 0, .5);
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, .5);
+}
