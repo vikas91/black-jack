@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 
-from webapp.models import Profile, Table, TablePlayer
+from webapp.models import Profile, Table, TablePlayer, Round, RoundPlayer
 
 class UserProfileInline(admin.StackedInline):
     model = Profile
@@ -18,3 +18,5 @@ admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Table)
 admin.site.register(TablePlayer)
+admin.site.register(Round)
+admin.site.register(RoundPlayer)

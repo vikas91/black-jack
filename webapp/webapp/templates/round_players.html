@@ -1,0 +1,59 @@
+{% if round_players %}
+<div class="row px-3 justify-content-center">
+  <div class="col-md-12 py-5">
+    <h3>Current Round</h3>
+  </div>
+  <div class="table-responsive">
+    <table class="table" data-wow-delay=".4s">
+      <thead class="thead-inverse">
+      <tr>
+        <th>#</th>
+        <th>UserName</th>
+        <th>Bet Amount</th>
+        <th>Cards</th>
+        <th>Card Count</th>
+        <th>Action</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>Dealer</td>
+          <td>Unlimited</td>
+          <td>{{active_round.dealer_cards}}</td>
+          <td>{{active_round.dealer_count}}</td>
+          <td>
+          {% if active_round.dealer_status == 0 %}
+            <a href="/table/{{table.id}}/deal" order="0" class="btn btn-primary">Deal</a>
+          {% elif active_round.dealer_status == 1 %}
+          
+          {% else %}
+            <a href="/table/{{table.id}}/play" class="btn btn-primary">Play</a>
+          {% endif %}
+          </td>
+          <td>{{active_round.dealer_status}}</td>
+        </tr>
+      {% for round_player in round_players %}
+        <tr>
+          <td>{{ round_player.player_order }}</td>
+          <td>{{round_player.player.username}}</td>
+          <td>{{round_player.player_bet}}</td>
+          <td>{{round_player.player_cards}}</td>
+          <td>{{round_player.player_count}}</td>
+          <td>
+          {% if not round_player.player_status %}
+            <a href="/table/{{table.id}}/deal" class="btn btn-primary disabled">Play</a>
+          {% else %}
+            <a href="/table/{{table.id}}/play" class="btn btn-primary">Stay</a>
+          {% endif %}
+          </td>
+          <td>{{round_player.player_status}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,41 @@
+<div class="row px-3 justify-content-center">
+  <div class="col-md-12 py-5">
+    <h3>Current Players</h3>
+  </div>
+  {% for table_player in table_players %}
+    <div class="card mx-1 player {% if not table_player.player_type %}bg-grey{% endif %}" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title">{{table_player.user_id.username}}</h5>
+        <p class="card-text">Current Player Wallet - {{table_player.user_id.profile.wallet_value}}</p>
+        <div class="form-group pt-1">
+          <div class="md-form">
+            <label>Bet Value</label>
+            <input class="player_bet_value" id="{{table_player.user_id.username}}" type="number" {% if table.table_status %}disabled{% endif %} value="{{table.min_bet}}" min="{{table.min_bet}}" max="{{table_player.user_id.profile.wallet_value}}">
+            <div class="alert alert-danger d-none">
+              <strong>Bet Value cannot be greater than wallet amount!</strong>
+            </div>
+          </div>
+        </div>
+        <p class="card-text player-current-status">Player Status - {% if table_player.player_type %} Active {% else %} Inactive {% endif %}</p>
+        {% if table_player.user_id == request.user %}
+          {% if table.table_status and table_player.player_type %}
+            <a href="/table/{{table.id}}/unjoin" class="btn btn-primary d-none player-unjoin">UnJoin Table</a>
+          {% else %}
+            <a href="/table/{{table.id}}/unjoin" class="btn btn-primary player-unjoin">UnJoin Table</a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+    <div class="card mx-1" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title">Dealer</h5>
+        <p class="card-text">Current Player Wallet - Unlimited</p>
+        {% if not table.table_status %}
+        <a href="#" class="btn btn-primary play-round" id="{{table.id}}">Play Round</a>
+        {% else %}
+        <a href="#" class="btn btn-secondary disabled play-round" id="{{table.id}}">Play Round</a>
+        {% endif %}
+      </div>
+    </div>
+</div>
