@@ -52,9 +52,9 @@ $(document).ready(function() {
                 	$(".player-unjoin").addClass("d-none");
                 },
                 success: function(data) {
-                	data = JSON.parse(data)
-                	$(".player-status-wrapper").html(data["player_html"])
-                	$(".current-round-wrapper").html(data["round_html"])
+                	data = JSON.parse(data);
+                	$(".player-status-wrapper").html(data["player_html"]);
+                	$(".current-round-wrapper").html(data["round_html"]);
                 },
                 error: function(xhr) {
                 },
@@ -63,4 +63,63 @@ $(document).ready(function() {
             });
 		}
 	});
+	
+	$(document).on('click','.player-hit', function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		if($(this).hasClass("disabled")){
+			return;
+		}
+		var formData = {
+         	"csrfmiddlewaretoken": getCookie("csrftoken") 
+ 	    };
+		var element=$(this);
+		$.ajax({
+            type: "POST",
+            url: "/table/" + $(this).attr('table')+ '/player/' + $(this).attr('order') + '/deal/',
+            data: formData,
+            beforeSend: function() {
+            	element.addClass("disabled btn-secondary").removeClass("btn-primary");
+            },
+            success: function(data) {
+            	data = JSON.parse(data)
+            	element.addClass("btn-primary").removeClass("disabled btn-secondary");
+            	$(".current-round-wrapper").html(data["round_html"]);
+            },
+            error: function(xhr) {
+            },
+            complete: function() {
+            }
+        });
+	})
+	
+	$(document).on('click','.player-stay', function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		if($(this).hasClass("disabled")){
+			return;
+		}
+		var formData = {
+         	"csrfmiddlewaretoken": getCookie("csrftoken") 
+ 	    };
+		var element=$(this);
+		$.ajax({
+            type: "POST",
+            url: "/table/" + $(this).attr('table')+ '/player/' + $(this).attr('order') + '/stay/',
+            data: formData,
+            beforeSend: function() {
+            	element.addClass("disabled btn-secondary").removeClass("btn-primary");
+            },
+            success: function(data) {
+            	data = JSON.parse(data)
+            	element.addClass("btn-primary").removeClass("disabled btn-secondary");
+            	$(".current-round-wrapper").html(data["round_html"]);
+            },
+            error: function(xhr) {
+            },
+            complete: function() {
+            }
+        });
+	})
+	
 });

@@ -16,7 +16,7 @@ Including another URLconf
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.contrib import admin
-from webapp.views import Register, Profile, Index, TableJoin, TableUnJoin, BJTable, RoundStart
+from webapp.views import Register, Profile, Index, TableJoin, TableUnJoin, BJTable, RoundStart, PlayerDeal, PlayerStay
 
 urlpatterns = [
     path('login/', auth_views.LoginView.as_view(), name='login'),
@@ -26,6 +26,8 @@ urlpatterns = [
     path('table/<table_id>/join/', TableJoin.as_view(), name="join_table"),
     path('table/<table_id>/unjoin/', TableUnJoin.as_view(), name="unjoin_table"),
     path('table/<table_id>/start-play/', RoundStart.as_view(), name="start_round"),
+    path('table/<table_id>/player/<player_order>/deal/', PlayerDeal.as_view(), name="player_deal"),
+    path('table/<table_id>/player/<player_order>/stay/', PlayerStay.as_view(), name="player_deal"),
     path('table/<table_id>/', BJTable.as_view()),
     path('profile/', Profile.as_view()),
     path('admin/', admin.site.urls),

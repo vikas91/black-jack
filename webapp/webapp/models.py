@@ -48,13 +48,13 @@ class TablePlayer(models.Model):
        
 class Round(models.Model):
     ROUND_STATUS = (
-        (0, 'deal'),
-        (1, 'wait'),
-        (2, 'play'),
+        (0, 'inactive'),
+        (1, 'active'),
     )
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     player_count = models.IntegerField(default=0)
     dealer_cards = models.CharField(max_length=256)
+    remaining_cards = models.CharField(max_length=256)
     dealer_count = models.IntegerField(default=0)
     dealer_status = models.IntegerField(default=0)
     round_status = models.IntegerField(choices=ROUND_STATUS, default=0)
@@ -70,6 +70,7 @@ class RoundPlayer(models.Model):
     PLAYER_ROUND_STATUS = (
         (0, 'inactive'),
         (1, 'active'),
+        (2, 'busted'),
     )
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
     player = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -77,6 +78,7 @@ class RoundPlayer(models.Model):
     player_bet = models.FloatField(default=0)
     player_cards = models.CharField(max_length=256)
     player_count = models.IntegerField(default=0)
+    player_max_count = models.IntegerField(default=0)
     player_status = models.IntegerField(choices=PLAYER_ROUND_STATUS, default=0)
     
     def __str__(self):
