@@ -153,7 +153,8 @@ def getCardDetails(inputCardValue):
         0 : "Club",
         1 : "Diamond",
         2 : "Heart",
-        3 : "Spade"
+        3 : "Spade",
+        4 : "Spade" #Added for card 52
     }
     
     cardValueMap = {1: ("A", 1), 2: ("2", 2), 3: ("3", 3), 4: ("4", 4), 5: ("5", 5), 6: ("6", 6), 7: ("7",7),
@@ -180,23 +181,70 @@ def dealCards(playerCount):
                 playerArray[j][0] = playerArray[j][0] + ',' +  cardString
                 playerArray[j][1] = playerArray[j][1] + cardValue   
     return playerArray, cardArray     
-        
+
+
+def getMaxCount(playerCards, playerCount):
+    playerCardList = playerCards.split(",")
+    playerFVList = [x.split()[1] for x in playerCardList]
+    playerMaxCount = playerCount
+    
+    for playerFV in playerFVList:
+        if playerFV == 'A':
+            playerMaxCount = playerCount+10 if(playerCount+10)<=21 else playerCount
+    
+    return playerMaxCount        
 
 def getMaxPlayerCount(player):
     playerCards = player.player_cards
     playerCount = player.player_count
-    playerCardList = playerCards.split(",")
-    playerFVList = [x.split()[1] for x in playerCardList]
-    
-    for playerFV in playerFVList:
-        if playerFV == 'A':
-            playerCount = playerCount+10 if(playerCount+10)<=21 else playerCount
-    
-    player.player_max_count = playerCount
+    player.player_max_count = getMaxCount(playerCards, playerCount)
     player.save()
     
     return player
+
+
+def updateDealerCards(dealer):
+    print("Updating dealer cardss")
+    dealerCards = dealer.dealer_cards
+    dealerCount = dealer.dealer_count
+    dealerMaxCount = getMaxCount(dealerCards, dealerCount)
+    remainingCardsList=[]
+    for x in dealer.remaining_cards.split(","):
+        if x: 
+            remainingCardsList.append(int(x))
+    
+    while(dealerCount<=17 and dealerMaxCount<=17):
+        newCard = remainingCardsList.pop()
+        cardString, cardValue = getCardDetails(newCard)
+        dealerCards = dealerCards + ',' + cardString
+        dealerCount = dealerCount + cardValue
+        dealerMaxCount = getMaxCount(dealerCards, dealerCount)
         
+    dealer.dealer_cards = dealerCards
+    dealer.dealer_count = dealerMaxCount
+    dealer.remaining_cards = ",".join([str(i) for i in remainingCardsList])
+    dealer.save()
+
+
+def updatePlayerStatus(playerObjList, dealerObj):
+    print("Updating player win status")
+    for playerObj in playerObjList:
+        if playerObj.player_max_count>21:
+            playerObj.player_win_status=0
+        else:
+            if dealerObj.dealer_count>21:
+                playerObj.player.profile.wallet_value = playerObj.player.profile.wallet_value + 2 * playerObj.player_bet
+                playerObj.player_win_status=2
+            else:
+                if playerObj.player_max_count > dealerObj.dealer_count:
+                    playerObj.player.profile.wallet_value = playerObj.player.profile.wallet_value + 2 * playerObj.player_bet
+                    playerObj.player_win_status=2
+                elif playerObj.player_max_count == dealerObj.dealer_count:
+                    playerObj.player.profile.wallet_value = playerObj.player.profile.wallet_value + playerObj.player_bet
+                    playerObj.player_win_status=1 
+        
+        playerObj.player.save()  
+        playerObj.save()            
         
 @method_decorator(login_required, name='dispatch')
 class RoundStart(View):
@@ -224,12 +272,12 @@ class RoundStart(View):
                 order = 1
                 round_players = []
                 for table_player in table_players:
-                    player_status = 1 if order==1 else 0
+                    player_game_status = 1 if order==1 else 0
                     if (table_player.user_id.profile.wallet_value - float(bet_value.get(table_player.user_id.username, 0))>=0):
                         round_player = RoundPlayer.objects.create(round=round_obj, 
                                                                   player=table_player.user_id, 
                                                                   player_order=order,
-                                                                  player_status=player_status, 
+                                                                  player_game_status=player_game_status, 
                                                                   player_cards=playerArray[order-1][0],
                                                                   player_count= playerArray[order-1][1],
                                                                   player_bet=float(bet_value.get(table_player.user_id.username, 0)))
@@ -261,6 +309,7 @@ class PlayerDeal(View):
     @transaction.atomic
     def post(self, request, table_id, player_order):
         current_table = Table.objects.filter(id=table_id)
+        player_order = int(player_order)
         if(current_table.count()==0):
             error_message = "Unable to start deal on table. Table doesn't exists!!"
             return redirect(reverse('index') + '?error=' + error_message)
@@ -289,7 +338,15 @@ class PlayerDeal(View):
                         round_player.player_cards = round_player.player_cards + ',' + cardString
                         round_player.player_count = round_player.player_count + cardValue
                         if(round_player.player_count>21):
-                            round_player.player_status=2
+                            round_player.player_game_status=2
+                            if(player_order<round.player_count):
+                                player_order = player_order+1
+                                round_players = RoundPlayer.objects.filter(round=round, player_order=player_order).update(player_game_status=1)
+                            else:
+                                # Stop Round Status
+                                updateDealerCards(round)
+                                round.round_status = 2
+                                round.save()
                              
                         round_player = getMaxPlayerCount(round_player)
                         
@@ -332,18 +389,22 @@ class PlayerStay(View):
                         return redirect(reverse('index') + '?error=' + error_message)
                     else:
                         round_player= round_player[0]
-                        round_player.player_status = 0
+                        round_player.player_game_status = 0
                         round_player.save()
                         
                         if(player_order<round.player_count):
                             player_order = player_order+1
-                            round_players = RoundPlayer.objects.filter(round=round, player_order=player_order).update(player_status=1)
+                            round_players = RoundPlayer.objects.filter(round=round, player_order=player_order).update(player_game_status=1)
                         else:
                             # Stop Round Status
-                            round.round_status = 1
+                            updateDealerCards(round)
+                            round.round_status = 2
                             round.save()
                         
                         round_players = RoundPlayer.objects.filter(round=round)
+                        if(round.round_status == 2):
+                            updatePlayerStatus(round_players, round)
+                        
                         updated_round_html = render_to_string('round_players.html', {"round_players": round_players, "active_round": round})
                 response_data = {"status": "Success", "http_status_code": 200, "round_html": updated_round_html} 
             except Exception:
@@ -351,3 +412,33 @@ class PlayerStay(View):
                 response_data = {"status": "Failure", "http_status_code": 500} 
             
             return HttpResponse(json.dumps(response_data), status=response_data["http_status_code"])
+
+
+@method_decorator(login_required, name='dispatch')
+class RoundStop(View):
+    @transaction.atomic
+    def post(self, request, table_id):
+        current_table = Table.objects.filter(id=table_id)
+        if(current_table.count()==0):
+            error_message = "Unable to stop dealing on table. Table doesn't exists!!"
+            return redirect(reverse('index') + '?error=' + error_message)
+        else:
+            current_table = current_table[0]
+            table_players = TablePlayer.objects.filter(table_id=current_table)
+            for table_player in table_players:
+                table_player.player_type = 0
+                table_player.save()
+                
+            current_table.table_status = 0
+            current_table.save()
+            
+            updated_player_html = render_to_string('current_players.html', {"table_players": table_players, "table": current_table})
+            updated_round_html = render_to_string('round_players.html', {"round_players": None, "active_round": None})
+            
+            response_data = {"status": "Success", 
+                             "player_html": updated_player_html, 
+                             "round_html": updated_round_html,
+                             "http_status_code": 200}
+            
+            return HttpResponse(json.dumps(response_data), status=response_data["http_status_code"])
+        

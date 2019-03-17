@@ -24,8 +24,12 @@
           <td>Unlimited</td>
           <td>{{active_round.dealer_cards}}</td>
           <td>{{active_round.dealer_count}}</td>
-          <td></td>
-          <td>{{active_round.dealer_status}}</td>
+          <td>
+          {% if active_round.round_status == 2 %}
+            <a href="#" table="{{active_round.table.id}}" class="btn btn-danger round-stop">Stop Round</a>
+          {% endif %}
+          </td>
+          <td>-</td>
         </tr>
       {% for round_player in round_players %}
         <tr>
@@ -35,17 +39,29 @@
           <td>{{round_player.player_cards}}</td>
           <td>{{round_player.player_count}}/ {{round_player.player_max_count}}</td>
           <td>
-          {% if round_player.player_status == 0 %}
+          {% if round_player.player_game_status == 0 %}
             <a href="#" order="{{ round_player.player_order }}" table="{{active_round.table.id}}" class="btn btn-primary disabled player-hit">Hit</a>
             <a href="#" order="{{ round_player.player_order }}" table="{{active_round.table.id}}" class="btn btn-warning disabled player-stay">Stay</a>
-          {% elif round_player.player_status == 1 %}
+          {% elif round_player.player_game_status == 1 %}
             <a href="#" order="{{ round_player.player_order }}" table="{{active_round.table.id}}" class="btn btn-primary player-hit">Hit</a>
             <a href="#" order="{{ round_player.player_order }}" table="{{active_round.table.id}}" class="btn btn-warning player-stay">Stay</a>
           {% else %}
-            <a href="#" class="btn btn-danger">Busted</a>
+            <a href="#" class="btn btn-danger disabled">Busted</a>
           {% endif %}
           </td>
-          <td>{{round_player.player_status}}</td>
+          <td>
+            {% if active_round.round_status == 2 %}
+              {% if round_player.player_win_status == 2 %}
+                WON!
+              {% elif round_player.player_win_status == 1 %}
+                DRAW
+              {% else %}
+                LOST
+              {% endif %}    
+            {% else %} 
+              N/A 
+            {% endif %}
+          </td>
         </tr>
       {% endfor %}
       </tbody>

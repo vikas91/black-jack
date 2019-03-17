@@ -50,6 +50,7 @@ class Round(models.Model):
     ROUND_STATUS = (
         (0, 'inactive'),
         (1, 'active'),
+        (2, 'end'),
     )
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     player_count = models.IntegerField(default=0)
@@ -72,6 +73,13 @@ class RoundPlayer(models.Model):
         (1, 'active'),
         (2, 'busted'),
     )
+    
+    PLAYER_WIN_STATUS =(
+        (0, 'LOST'),
+        (1, 'DRAW'),
+        (2, 'WON'),
+    )
+    
     round = models.ForeignKey(Round, on_delete=models.CASCADE)
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     player_order = models.IntegerField(default=0)
@@ -79,7 +87,8 @@ class RoundPlayer(models.Model):
     player_cards = models.CharField(max_length=256)
     player_count = models.IntegerField(default=0)
     player_max_count = models.IntegerField(default=0)
-    player_status = models.IntegerField(choices=PLAYER_ROUND_STATUS, default=0)
+    player_game_status = models.IntegerField(choices=PLAYER_ROUND_STATUS, default=0)
+    player_win_status = models.IntegerField(default=0)
     
     def __str__(self):
         return 'Round-' + str(self.round.id) + '-' + str(self.player.username)
