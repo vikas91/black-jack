@@ -1,0 +1,31 @@
+{% extends 'index.html' %}
+
+{% block content %}
+  <h1> You Have Joined Table - {{table.id}} !</h1>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card w-100">
+        <div class="card-body">
+          <h5 class="card-title">Min Bet - {{table.min_bet}}</h5>
+          <p class="card-text">Current Player Count - {{table.player_count}}/6</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row px-3 justify-content-center">
+    <div class="col-md-12 py-5">
+      <h3>Current Players</h3>
+    </div>
+    {% for table_player in table_players %}
+      <div class="card mx-1" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{table_player.user_id.username}}</h5>
+          <p class="card-text">Current Player Wallet - {{table_player.user_id.profile.wallet_value}}</p>
+          {% if table_player.user_id == request.user %}
+            <a href="/table/{{table.id}}/unjoin" class="btn btn-primary">UnJoin Table</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

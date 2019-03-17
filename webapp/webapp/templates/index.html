@@ -46,6 +46,9 @@
     </div>
     {% endblock %}
   <main class="text-center mt-5">
+    {% if error %}
+      <div class="alert alert-danger" role="alert">{{error}}</div>
+    {% endif %}
     {% block content %}
       <h1> Welcome to Blackjack Game {{request.user.username}} !</h1>
       {% if request.user.profile.wallet_value == 0 %}
@@ -58,8 +61,8 @@
             <div class="card-body">
               <h5 class="card-title">Table - {{table.id}}</h5>
               <p class="card-text">Min Bet - {{table.min_bet}}</p>
-              <p class="card-text">Current Player Count - {{table.player_count}}</p>
-              <a href="#" class="btn btn-primary">Join</a>
+              <p class="card-text">Current Player Count - {{table.player_count}}/6</p>
+              <a href="/table/{{table.id}}/join" class="btn btn-primary">Join</a>
             </div>
           </div>
         {% endfor %}
