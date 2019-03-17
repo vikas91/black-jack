@@ -12,7 +12,7 @@
    2. $ sudo apt install pip3
    3. $ sudo pip3 install virtuale
    
-# Project Setup and Running instructions
+# Project Setup instructions
 1. $ cd ~/workspace/black-jack
 2. $ virtualenv packages
 3. $ source packages/bin/activate
@@ -20,5 +20,16 @@
 5. $ cd ~/workspace/black-jack/webapp
 6. $ python manage.py makemigrations webapp
 7. $ python manage.py migrate
-8. $ python manage.py runserver 0.0.0.0:8000
+
+# Django Server Running Instructions
+8. $ screen 
+9. $ python manage.py runserver 0.0.0.0:8000
+10.$ ctrl + a + d (detach from screen)
+
+# Superuser Creation
+1. $ cd ~/workspace/black-jack/webapp
+2. $ python manage.py createsuperuser
+3. Create tables by adding minimum bet value for the table by visiting admin url http://0.0.0.0:8000
+
+
 
