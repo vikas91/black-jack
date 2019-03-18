@@ -81,7 +81,13 @@ class BJTable(View):
                 return redirect('/table/'+ str(current_table.id) + '/join/')
             
             table_players = TablePlayer.objects.filter(table_id=current_table)
-            active_round = Round.objects.filter(table=current_table, round_status=1)
+            if current_table.table_status==0:
+                active_round = Round.objects.filter(table=current_table, round_status__in=[1]).order_by('-id')
+            else:
+                active_round = Round.objects.filter(table=current_table, round_status__in=[1,2]).order_by('-id')
+            
+            print(active_round.count())
+            
             if active_round.count()!=0:
                 active_round = active_round[0]
                 round_players = RoundPlayer.objects.filter(round=active_round).order_by('player_order')
